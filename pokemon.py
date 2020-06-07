@@ -3,6 +3,8 @@
 # Select 3 pokemon, with a budget of level points
 # When a pokeon faints, choose another available pokemon
 
+from random import randint
+
 pokemon_list=[]
 
 class Pokemon:
@@ -18,7 +20,7 @@ class Pokemon:
 		#Making attack list dependent on level
 		self.attack_list={}
 		for i in range(len(attacks)):
-			# Creating dictionary {counter:[name,damage]}
+			# Creating dictionary {counter:[Attack,damage]}
 			self.attack_list[i+1] = [attacks[i],int(attacks[i].damage*((10+self.level)/10))]
 		pokemon_list.append(self)
 
@@ -41,12 +43,16 @@ class Pokemon:
 		else:
 			print("{name} now has {health} hp.\n".format(name=self.name, health=str(self.current_health)))
 
-
+	# attack_number=int, opponent=pokemon
 	def use_attack(self, attack_number, opponent):
 		attack = self.attack_list[attack_number][0]
-		damage = int(self.attack_list[attack_number][1] * (super_effective(attack.element, opponent.element)))
 		print("\n{name} used {attack_name}".format(name=self.name, attack_name=attack.name))
-		opponent.lose_health(damage)
+		if randint(0,2)==1:
+			print("The attack missed!")
+			print("{name} still has {health}  hp.\n".format(name=opponent.name, health=str(opponent.current_health)))
+		else:
+			damage = int(self.attack_list[attack_number][1] * (super_effective(attack.element, opponent.element)))
+			opponent.lose_health(damage)
 
 
 class Attack:
@@ -56,10 +62,13 @@ class Attack:
 		self.damage=damage
 		self.element=element
 
+player_list=[]
 class Player:
 	def __init__(self, name, pokemon):
 		self.name=name
 		self.pokemon=pokemon
+		player_list.append(self)
+
 
 # Super Effective function
 def super_effective(attack_type, opponent_type):
@@ -77,16 +86,16 @@ def super_effective(attack_type, opponent_type):
 	else:
 		return 1
 
-tackle=Attack("Tackle", 10)
-flamethrower=Attack("Flamethrower", 15, "Fire")
-bubble=Attack("Bubble",15,"Water")
-leaf=Attack("Leaf Throw",15,"Grass")
-throw=Attack("Throw", 15)
+tackle=Attack("Tackle", 5)
+flamethrower=Attack("Flamethrower", 10, "Fire")
+bubble=Attack("Bubble",10,"Water")
+leaf=Attack("Leaf Throw",10,"Grass")
+throw=Attack("Throw", 10)
 
 charmander=Pokemon("Charmander",4,"Fire",[tackle,flamethrower])
 squirtle=Pokemon("Squirtle",5,"Water",[tackle,bubble])
 bulbasaur=Pokemon("Bulbasaur",7,"Grass",[tackle,leaf])
-geodude=Pokemon("Geodude",11,"Rock",[tackle,throw])
+geodude=Pokemon("Geodude",6,"Rock",[tackle,throw])
 
 #game start
 for pokemon in pokemon_list:
@@ -111,34 +120,34 @@ print()
 print(player1.name+" chose "+player1.pokemon.name)
 print(player2.name+" chose "+player2.pokemon.name)
 print("Let's play!")
+print()
+
+# player=Player, opponent=Player
+def turn(player, opponent):
+	print(player.name+"'s turn!")
+	print(player.pokemon.name)
+	for i in player.pokemon.attack_list:
+		print("{number}: {attack_name} - {damage}hp".format(\
+			number = str(i),\
+			attack_name = player.pokemon.attack_list[i][0].name,\
+			damage = str(player.pokemon.attack_list[i][1])))
+	attack_number=int(input("Choose attack number: "))
+	player.pokemon.use_attack(attack_number, opponent.pokemon)
 
 
 
-#while charmander.faint==False and squirtle.faint==False:
-#	print("Charmander's turn!")
-#	print()
-#	for n in charmander.attack_list:
-#		print("{n}: {name} - {damage}hp".format(n=n, name=charmander.attack_list[n][0].name, damage=str(charmander.attack_list[n][1])))
-#	print()
-#	attack_number=int(input("Which attack number? "))
-#
-#	charmander.use_attack(attack_number,squirtle)
-#	if squirtle.faint==True:
-#		break
-#
-#	print("Squirtle's turn!")
-#	print()
-#	for n in squirtle.attack_list:
-#		print("{n}: {name} - {damage}hp".format(n=n, name=squirtle.attack_list[n][0].name, damage=str(squirtle.attack_list[n][1])))
-#	print()
-#	attack_number=int(input("Which attack number? "))
-#	squirtle.use_attack(attack_number,charmander)
-#
+while (player1.pokemon.faint == False) and (player2.pokemon.faint == False):
+	turn(player1,player2)
+	if player2.pokemon.faint == True:
+		break
+	turn(player2,player1)
 
-#endgame
-#if charmander.faint==True:
-#	print("Squirtle wins!")
-#else:
-#	print("Charmander wins!")
+
+# Endgame
+print()
+if player1.pokemon.faint==True:
+	print(player2.name + " wins with " + player2.pokemon.name + "!!!")
+else:
+	print(player1.name + " wins with " + player1.pokemon.name + "!!!")
 
 
