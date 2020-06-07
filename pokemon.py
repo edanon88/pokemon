@@ -28,6 +28,7 @@ class Pokemon:
 		return("{name}\nLevel: {level}\nElement: {element}\nHealth: {health}\nAttacks: \n{attacks}\n"
 			.format(name=self.name, level=str(self.level), element=self.element, health=str(self.current_health), \
 			attacks=attacks_string))
+	
 	#damage=int
 	def lose_health(self, damage):
 		self.current_health-=damage
@@ -38,17 +39,11 @@ class Pokemon:
 		else:
 			print("{name} now has {health} hp.\n".format(name=self.name, health=str(self.current_health)))
 
-	def super_effective(attack_type,opponent_type):
-		if (attack_type == "Grass" and opponent_type == "Water")\
-		or (attack_type == "Fire" and opponent_type == "Grass")\
-		or (attack_type == "Water" and opponent_type == "Fire"):
-			return 2
-		else:
-			return 1
 
 	def use_attack(self, attack_number, opponent):
 		print("\n{name} used {attack_name}".format(name=self.name, attack_name=self.attack_list[attack_number][0].name))
-		opponent.lose_health(self.attack_list[attack_number][1])
+		damage = int(self.attack_list[attack_number][1] * (super_effective(self.attack_list[attack_number][0].element, opponent.element)))
+		opponent.lose_health(damage)
 
 # Trainer class
 class Trainer:
@@ -67,11 +62,26 @@ class Attack:
 		self.damage=damage
 		self.element=element
 
+
+# Super Effective function
+def super_effective(attack_type, opponent_type):
+	if (attack_type == "Water" and opponent_type == "Fire")\
+	or (attack_type == "Grass" and opponent_type == "Water")\
+	or (attack_type == "Fire" and opponent_type == "Grass"):
+		print("It's super effective!")
+		return 1.5
+	elif (attack_type == "Grass" and opponent_type == "Fire")\
+	or (attack_type == "Fire" and opponent_type == "Water")\
+	or (attack_type == "Water" and opponent_type == "Grass"):
+		print("It's not very effective....")
+		return 0.5
+	else:
+		return 1
+
 tackle=Attack("Tackle", 10)
 flamethrower=Attack("Flamethrower", 15, "Fire")
 bubble=Attack("Bubble",15,"Water")
 leaf=Attack("Leaf Throw",15,"Grass")
-
 
 charmander=Pokemon("Charmander",4,"Fire",[tackle,flamethrower])
 squirtle=Pokemon("Squirtle",5,"Water",[tackle,bubble])
@@ -82,6 +92,8 @@ print(charmander)
 print(squirtle)
 print(bulbasaur)
 
+
+
 while charmander.faint==False and squirtle.faint==False:
 	print("Charmander's turn!")
 	print()
@@ -89,7 +101,7 @@ while charmander.faint==False and squirtle.faint==False:
 		print("{n}: {name} - {damage}hp".format(n=n, name=charmander.attack_list[n][0].name, damage=str(charmander.attack_list[n][1])))
 	print()
 	attack_number=int(input("Which attack number? "))
-	
+
 	charmander.use_attack(attack_number,squirtle)
 	if squirtle.faint==True:
 		break
@@ -102,14 +114,6 @@ while charmander.faint==False and squirtle.faint==False:
 	attack_number=int(input("Which attack number? "))
 	squirtle.use_attack(attack_number,charmander)
 
-# Super effective function:
-def super_effective(attack_type,opponent_type):
-	if attack_type == "Grass" and opponent_type == "Water"\
-	or attack_type == "Fire" and opponent_type == "Grass"\
-	or attack_type == "Water" and opponent_type == "Fire":
-		return [True,2]
-	else:
-		return [False,1]
 
 #endgame
 if charmander.faint==True:
